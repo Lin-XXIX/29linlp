@@ -1,0 +1,34 @@
+pragma solidity ^0.6.0;
+
+contract Banking {
+    mapping(address => uint256) public user_account;
+    mapping(address => bool) public user_exists;
+
+    function create_account() public payable {
+        require(user_exists[msg.sender] == false, "Account already exists");
+        user_account[msg.sender] = msg.value;
+        user_exists[msg.sender] = true;
+    }
+
+    function deposit(uint256 amount) public payable {
+        require(user_exists[msg.sender] == true, "Account not created");
+        require(amount > 0, "Amount must be greater than zero");
+        require(msg.value == amount, "Ether sent must match the deposit amount");
+
+        user_account[msg.sender] += amount;
+    }
+
+    function withdraw(uint256 amount) public {
+        require(user_exists[msg.sender] == true, "Account not created");
+        require(user_account[msg.sender] >= amount, "Insufficient balance");
+        require(amount > 0, "Amount must be greater than zero");
+
+        user_account[msg.sender] -= amount;
+        msg.sender.transfer(amount);
+    }
+
+    function show_balance() public view returns (uint256) {
+        require(user_exists[msg.sender] == true, "Account not created");
+        return user_account[msg.sender];
+    }
+}
